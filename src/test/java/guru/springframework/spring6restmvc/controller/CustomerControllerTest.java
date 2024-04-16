@@ -1,0 +1,102 @@
+package guru.springframework.spring6restmvc.controller;
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.springframework.spring6restmvc.model.Customer;
+import guru.springframework.spring6restmvc.services.CustomerService;
+import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(CustomerController.class)
+class CustomerControllerTest {
+
+    @MockBean
+    CustomerService customerService;
+
+    @Autowired
+    ObjectMapper objectMapper; //Use this to create JSon
+    @Autowired
+    MockMvc mockMvc;
+
+    CustomerServiceImpl customerServiceImpl;
+
+    @BeforeEach
+    void setUp(){
+        customerServiceImpl = new CustomerServiceImpl();
+    }
+
+    @Test
+    void createNewCustomer() throws Exception {
+
+        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+        System.out.println(objectMapper.writeValueAsString(customer));
+
+        customer.setVersion(null);
+        customer.setCreatedDate(null);
+        customer.setUpdateDate(null);
+
+        given(customerService.saveNewCustomer(customer)).willReturn(customerServiceImpl.getAllCustomers().get(1));
+
+
+        mockMvc.perform(post("/api/v1/customer")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
+    }
+
+
+    @Test
+    void listAllCustomers() throws Exception {
+        given(customerService.getAllCustomers()).willReturn(customerServiceImpl.getAllCustomers());
+
+        mockMvc.perform(get("/api/v1/customer")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()", is(3)));
+    }
+
+    @Test
+    void getCustomerById() throws Exception {
+        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+
+        given(customerService.getCustomerById(customer.getId())).willReturn(customer);
+
+        mockMvc.perform(get("/api/v1/customer/" + customer.getId())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name", is(customer.getName())));
+
+    }
+
+    @Test
+    void updateCustomer() throws Exception {
+        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+
+        mockMvc.perform(put("/api/v1/customer/" + customer.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isNoContent());
+
+        verify(customerService).updateCustomerById(any(UUID.class), any(Customer.class)); //verify the method was called using any customer UUID and class
+    }
+}

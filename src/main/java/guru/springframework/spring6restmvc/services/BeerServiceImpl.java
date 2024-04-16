@@ -1,19 +1,23 @@
-package guru.springframework.spring6restmvc.Service;
+package guru.springframework.spring6restmvc.services;
 
-import guru.springframework.spring6restmvc.Model.Beer;
-import guru.springframework.spring6restmvc.Model.BeerStyle;
+import guru.springframework.spring6restmvc.model.Beer;
+import guru.springframework.spring6restmvc.model.BeerStyle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Created by jt, Spring Framework Guru.
+ */
 @Slf4j
 @Service
 public class BeerServiceImpl implements BeerService {
 
-    private final Map<UUID, Beer> beerMap;
+    private Map<UUID, Beer> beerMap;
 
     public BeerServiceImpl() {
         this.beerMap = new HashMap<>();
@@ -23,9 +27,9 @@ public class BeerServiceImpl implements BeerService {
                 .version(1)
                 .beerName("Galaxy Cat")
                 .beerStyle(BeerStyle.PALE_ALE)
+                .upc("12356")
                 .price(new BigDecimal("12.99"))
                 .quantityOnHand(122)
-                .upc("18239384939")
                 .createdDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
@@ -33,11 +37,11 @@ public class BeerServiceImpl implements BeerService {
         Beer beer2 = Beer.builder()
                 .id(UUID.randomUUID())
                 .version(1)
-                .beerName("Galaxy")
+                .beerName("Crank")
                 .beerStyle(BeerStyle.PALE_ALE)
-                .price(new BigDecimal("12.99"))
-                .quantityOnHand(122)
-                .upc("92839474")
+                .upc("12356222")
+                .price(new BigDecimal("11.99"))
+                .quantityOnHand(392)
                 .createdDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
@@ -45,11 +49,11 @@ public class BeerServiceImpl implements BeerService {
         Beer beer3 = Beer.builder()
                 .id(UUID.randomUUID())
                 .version(1)
-                .beerName("Cat")
-                .beerStyle(BeerStyle.PALE_ALE)
-                .price(new BigDecimal("12.99"))
-                .upc("038494859")
-                .quantityOnHand(122)
+                .beerName("Sunshine City")
+                .beerStyle(BeerStyle.IPA)
+                .upc("12356")
+                .price(new BigDecimal("13.99"))
+                .quantityOnHand(144)
                 .createdDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .build();
@@ -58,20 +62,65 @@ public class BeerServiceImpl implements BeerService {
         beerMap.put(beer2.getId(), beer2);
         beerMap.put(beer3.getId(), beer3);
     }
+
     @Override
-    public List<Beer> getListOfBeers(){
+    public void patchBeerById(UUID beerId, Beer beer) {
+        Beer existing = beerMap.get(beerId);
+
+        if (StringUtils.hasText(beer.getBeerName())){
+            existing.setBeerName(beer.getBeerName());
+        }
+
+        if (beer.getBeerStyle() != null) {
+            existing.setBeerStyle(beer.getBeerStyle());
+        }
+
+        if (beer.getPrice() != null) {
+            existing.setPrice(beer.getPrice());
+        }
+
+        if (beer.getQuantityOnHand() != null){
+            existing.setQuantityOnHand(beer.getQuantityOnHand());
+        }
+
+        if (StringUtils.hasText(beer.getUpc())) {
+            existing.setUpc(beer.getUpc());
+        }
+    }
+
+    @Override
+    public void deleteById(UUID beerId) {
+        beerMap.remove(beerId);
+    }
+
+    @Override
+    public void updateBeerById(UUID beerId, Beer beer) {
+        Beer existing = beerMap.get(beerId);
+        existing.setBeerName(beer.getBeerName());
+        existing.setPrice(beer.getPrice());
+        existing.setUpc(beer.getUpc());
+        existing.setQuantityOnHand(beer.getQuantityOnHand());
+    }
+
+    @Override
+    public List<Beer> listBeers(){
         return new ArrayList<>(beerMap.values());
     }
 
     @Override
     public Beer getBeerById(UUID id) {
+
+        log.debug("Get Beer by Id - in service. Id: " + id.toString());
+
         return beerMap.get(id);
     }
 
     @Override
     public Beer saveNewBeer(Beer beer) {
+
         Beer savedBeer = Beer.builder()
                 .id(UUID.randomUUID())
+                .version(1)
                 .createdDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
                 .beerName(beer.getBeerName())
