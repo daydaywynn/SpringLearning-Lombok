@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -69,7 +70,8 @@ public class BeerController {
 
         log.debug("Get Beer by Id - in controller");
 
-        return beerService.getBeerById(beerId);
+        //if optional doesn't have a value the controller can throw the exception to avoid the 404 error (Research Optionals)
+        return beerService.getBeerById(beerId).orElseThrow(NotFoundException::new);
     }
 
 
