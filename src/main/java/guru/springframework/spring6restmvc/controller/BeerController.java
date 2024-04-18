@@ -72,14 +72,6 @@ public class BeerController {
         return beerService.getBeerById(beerId);
     }
 
-    /**
-     * If something in this controller throws a not found exception
-     * it'll be handled by NotFoundException class
-     * @return
-     */
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity handleNotFoundException(){
-        return ResponseEntity.notFound().build();
-    }
+
 
 }
