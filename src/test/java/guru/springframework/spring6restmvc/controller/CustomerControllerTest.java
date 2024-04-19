@@ -2,7 +2,7 @@ package guru.springframework.spring6restmvc.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.spring6restmvc.model.Customer;
+import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class CustomerControllerTest {
     @Captor
     ArgumentCaptor <UUID> argumentCaptorUUID;
     @Captor
-    ArgumentCaptor <Customer> argumentCaptorCust;
+    ArgumentCaptor <CustomerDTO> argumentCaptorCust;
 
     CustomerServiceImpl customerServiceImpl;
 
@@ -61,7 +61,7 @@ class CustomerControllerTest {
     @Test
     void createNewCustomer() throws Exception {
 
-        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
         System.out.println(objectMapper.writeValueAsString(customer));
 
         customer.setVersion(null);
@@ -93,7 +93,7 @@ class CustomerControllerTest {
 
     @Test
     void getCustomerById() throws Exception {
-        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
 
         given(customerService.getCustomerById(customer.getId())).willReturn(Optional.of(customer));
 
@@ -107,7 +107,7 @@ class CustomerControllerTest {
 
     @Test
     void updateCustomer() throws Exception {
-        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
 
         mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customer.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,12 +115,12 @@ class CustomerControllerTest {
                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNoContent());
 
-        verify(customerService).updateCustomerById(any(UUID.class), any(Customer.class)); //verify the method was called using any customer UUID and class
+        verify(customerService).updateCustomerById(any(UUID.class), any(CustomerDTO.class)); //verify the method was called using any customer UUID and class
     }
 
     @Test
     void testDeleteCustomer() throws Exception{
-        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
 
         mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customer.getId())
                 .content(objectMapper.writeValueAsString(customer))
@@ -132,7 +132,7 @@ class CustomerControllerTest {
 
     @Test
     void testPatchCustomer() throws Exception{
-        Customer customer = customerServiceImpl.getAllCustomers().get(0);
+        CustomerDTO customer = customerServiceImpl.getAllCustomers().get(0);
         Map<String, Object> customerMap = new HashMap<>();
         customerMap.put("name", "New Name");
         mockMvc.perform(patch(CustomerController.CUSTOMER_PATH_ID, customer.getId())
