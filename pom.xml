@@ -85,12 +85,12 @@
 					</path>
 					<path>
 						<groupId>org.projectlombok</groupId>
-						<artifactId>lombox-mapstruct-binding</artifactId>
+						<artifactId>lombok-mapstruct-binding</artifactId>
 						<version>0.2.0</version>
 					</path>
 				</annotationProcessorPaths>
 				<compilerArgs>
-					<compilerArg>@mapstruct.defaultComponentModel=spring</compilerArg>
+					<compilerArg>-Amapstruct.defaultComponentModel=spring</compilerArg>
 				</compilerArgs>
 			</configuration>
 		</plugin>
